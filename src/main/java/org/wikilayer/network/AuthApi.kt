@@ -1,0 +1,199 @@
+package org.wikilayer.network
+
+import android.net.Uri
+import com.fasterxml.jackson.databind.ObjectMapper
+import okhttp3.FormBody
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.wikilayer.network.model.Account
+import org.wikilayer.network.model.Credential
+import org.wikilayer.network.model.TokenGrant
+
+class AuthApi(
+    private val hosts: WikiHostPool,
+    client: OkHttpClient,
+    private val mapper: ObjectMapper,
+    private val clientTheServerRegistered: OAuthClient,
+) {
+    constructor(
+        baseUrl: String,
+        client: OkHttpClient,
+        mapper: ObjectMapper,
+        clientTheServerRegistered: OAuthClient,
+    ) : this(WikiHostPool(baseUrl), client, mapper, clientTheServerRegistered)
+
+    private val transport = JsonTransport(client, mapper)
+
+    suspend fun signIn(
+        identityToken: String,
+        provider: NativeProvider = NativeProvider.GOOGLE,
+        nameOfferedOnce: String = "",
+    ): Credential =
+        onSelectedHost(hosts) { host ->
+            transport
+                .value(
+                    TokenGrant::class.java,
+                    Request
+                        .Builder()
+                        .url(address(host, "api/auth/${provider.wireName}"))
+                        .post(
+                            mapper
+                                .writeValueAsBytes(mapOf("id_token" to identityToken, "name" to nameOfferedOnce))
+                                .toRequestBody(JSON),
+                        ).build(),
+                ).credential()
+        }
+
+    suspend fun prepareHost() {
+        onAvailableHost(hosts) { host ->
+            transport.data(
+                Request
+                    .Builder()
+                    .url(address(host, "api/wikis"))
+                    .get()
+                    .build(),
+            )
+        }
+    }
+
+    fun authorizationRequest(
+        provider: String,
+        state: String,
+        challenge: String,
+    ): AuthorizationRequest? =
+        hosts.candidates().firstOrNull()?.let { host ->
+            AuthorizationRequest(
+                Uri
+                    .parse(host)
+                    .buildUpon()
+                    .appendEncodedPath("oauth/authorize")
+                    .appendQueryParameter("client_id", clientTheServerRegistered.id)
+                    .appendQueryParameter("redirect_uri", clientTheServerRegistered.redirectUri)
+                    .appendQueryParameter("response_type", "code")
+                    .appendQueryParameter("scope", clientTheServerRegistered.scope)
+                    .appendQueryParameter("provider", provider)
+                    .appendQueryParameter("state", state)
+                    .appendQueryParameter("code_challenge", challenge)
+                    .appendQueryParameter("code_challenge_method", "S256")
+                    .build()
+                    .toString(),
+                host,
+            )
+        }
+
+    fun authorizationUrl(
+        provider: String,
+        state: String,
+        challenge: String,
+    ): String = requireNotNull(authorizationRequest(provider, state, challenge)).url
+
+    suspend fun exchange(
+        code: String,
+        verifier: String,
+        authorization: AuthorizationRequest,
+    ): Credential =
+        try {
+            transport
+                .value(
+                    TokenGrant::class.java,
+                    Request
+                        .Builder()
+                        .url(address(authorization.host, "oauth/token"))
+                        .post(
+                            FormBody
+                                .Builder()
+                                .add("grant_type", "authorization_code")
+                                .add("code", code)
+                                .add("code_verifier", verifier)
+                                .add("client_id", clientTheServerRegistered.id)
+                                .add("redirect_uri", clientTheServerRegistered.redirectUri)
+                                .build(),
+                        ).build(),
+                ).credential()
+        } catch (api: WikiApiError) {
+            throw api
+        } catch (network: java.io.IOException) {
+            throw WikiApiError.Unreachable(
+                listOf(
+                    WikiHostFailure(
+                        authorization.host,
+                        WikiHostFailure.Reason.Network(network.message ?: network.javaClass.simpleName),
+                    ),
+                ),
+                network,
+            )
+        }
+
+    suspend fun account(credential: Credential): Account =
+        onAvailableHost(hosts) { host ->
+            transport.value(Account::class.java, signed(host, "api/me", credential).get().build())
+        }
+
+    suspend fun rename(
+        to: String,
+        credential: Credential,
+    ): Account =
+        onAvailableHost(hosts) { host ->
+            transport.value(
+                Account::class.java,
+                signed(host, "api/me", credential)
+                    .patch(mapper.writeValueAsBytes(mapOf("display_name" to to)).toRequestBody(JSON))
+                    .build(),
+            )
+        }
+
+    suspend fun signOut(credential: Credential) {
+        onSelectedHost(hosts) { host ->
+            transport.data(
+                signed(host, "api/auth/signout", credential)
+                    .post(ByteArray(0).toRequestBody(null))
+                    .build(),
+            )
+        }
+    }
+
+    private fun signed(
+        host: String,
+        path: String,
+        credential: Credential,
+    ): Request.Builder =
+        Request
+            .Builder()
+            .url(address(host, path))
+            .header("Authorization", "Bearer ${credential.token}")
+
+    private fun address(
+        host: String,
+        path: String,
+    ): String =
+        Uri
+            .parse(host)
+            .buildUpon()
+            .appendEncodedPath(path)
+            .build()
+            .toString()
+
+    companion object {
+        private val JSON = "application/json".toMediaType()
+    }
+}
+
+enum class NativeProvider(
+    val wireName: String,
+) {
+    APPLE("apple"),
+    GOOGLE("google"),
+}
+
+class AuthorizationRequest internal constructor(
+    val url: String,
+    internal val host: String,
+)
+
+data class OAuthClient(
+    val id: String,
+    val redirectUri: String,
+    val scope: String,
+)
