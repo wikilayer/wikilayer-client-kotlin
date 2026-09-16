@@ -1,7 +1,7 @@
 # wikilayer-client-kotlin
 
 [![Tests](https://github.com/wikilayer/wikilayer-client-kotlin/actions/workflows/tests.yml/badge.svg)](https://github.com/wikilayer/wikilayer-client-kotlin/actions/workflows/tests.yml)
-[![Documentation](https://github.com/wikilayer/wikilayer-client-kotlin/actions/workflows/documentation.yml/badge.svg)](https://github.com/wikilayer/wikilayer-client-kotlin/actions/workflows/documentation.yml)
+[![Documentation](https://github.com/wikilayer/wikilayer-client-kotlin/actions/workflows/documentation.yml/badge.svg)](https://wikilayer.github.io/wikilayer-client-kotlin/)
 
 The Kotlin/Android client for Wikilayer's API. It is a port of
 [wikilayer-client-swift](https://github.com/wikilayer/wikilayer-client-swift),

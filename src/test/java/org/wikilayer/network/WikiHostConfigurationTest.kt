@@ -4,12 +4,27 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.net.URI
 
 class WikiHostConfigurationTest {
     @Test
     fun `the bundled host belongs to the library`() {
         assertEquals("https://wikilayer.org", WikiHostConfiguration.bundled.primary)
         assertTrue(WikiHostConfiguration.bundled.mirrors.isEmpty())
+    }
+
+    @Test
+    fun `the bundled hosts match the leading Swift port`() {
+        val leading =
+            URI(
+                "https://raw.githubusercontent.com/wikilayer/" +
+                    "wikilayer-client-swift/main/Sources/WikilayerClient/Resources/hosts.yaml",
+            ).toURL().readText()
+        val bundled =
+            checkNotNull(WikiHostConfiguration::class.java.getResource("/hosts.yaml"))
+                .readText()
+
+        assertEquals(leading, bundled)
     }
 
     @Test
