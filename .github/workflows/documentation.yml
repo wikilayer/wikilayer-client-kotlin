@@ -27,6 +27,8 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - uses: actions/configure-pages@v6
       - name: Build documentation
         run: make docs
