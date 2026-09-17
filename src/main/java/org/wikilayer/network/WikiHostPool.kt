@@ -75,6 +75,7 @@ internal suspend fun <T> onAvailableHost(
         } catch (api: WikiApiError) {
             throw api
         } catch (network: IOException) {
+            if (network.saysTheCallerStopped()) throw network
             failures +=
                 WikiHostFailure(
                     host,
@@ -96,6 +97,7 @@ internal suspend fun <T> onSelectedHost(
     } catch (api: WikiApiError) {
         throw api
     } catch (network: IOException) {
+        if (network.saysTheCallerStopped()) throw network
         throw WikiApiError.Unreachable(
             listOf(
                 WikiHostFailure(
@@ -107,6 +109,8 @@ internal suspend fun <T> onSelectedHost(
         )
     }
 }
+
+internal fun IOException.saysTheCallerStopped(): Boolean = message == "Canceled"
 
 internal fun IOException.kind(): NetworkKind =
     when (this) {
