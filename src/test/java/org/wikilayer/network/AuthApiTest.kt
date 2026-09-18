@@ -153,6 +153,26 @@ class AuthApiTest {
         }
 
     @Test
+    fun `closing an account sends the optional reason with the credential`() =
+        runTest {
+            answer("", code = 204)
+
+            auth.deleteAccount(reason = "No longer needed", credential = Credential("tok-7"))
+
+            val asked = server.takeRequest()
+            assertEquals("/api/me", Uri.parse(asked.url.toString()).path)
+            assertEquals("DELETE", asked.method)
+            assertEquals("Bearer tok-7", asked.headers["Authorization"])
+            assertEquals("application/json", asked.headers["Content-Type"])
+            assertTrue(
+                asked.body
+                    ?.utf8()
+                    .orEmpty()
+                    .contains("No longer needed"),
+            )
+        }
+
+    @Test
     fun `signing out revokes the token rather than only forgetting it`() =
         runTest {
             answer("", code = 204)

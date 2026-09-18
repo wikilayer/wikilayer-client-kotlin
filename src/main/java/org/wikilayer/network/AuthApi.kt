@@ -150,6 +150,20 @@ class AuthApi internal constructor(
             )
         }
 
+    /** Permanently closes the account represented by [credential]. */
+    suspend fun deleteAccount(
+        reason: String,
+        credential: Credential,
+    ) {
+        onSelectedHost(hosts) { host ->
+            transport.data(
+                signed(host, "api/me", credential)
+                    .delete(mapper.writeValueAsBytes(mapOf("reason" to reason)).toRequestBody(JSON))
+                    .build(),
+            )
+        }
+    }
+
     /** Revokes [credential] on its selected host. */
     suspend fun signOut(credential: Credential) {
         onSelectedHost(hosts) { host ->
