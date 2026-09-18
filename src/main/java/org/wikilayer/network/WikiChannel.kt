@@ -18,10 +18,12 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
+/** Supplies the credential to use for the next live-channel connection. */
 fun interface Signing {
     fun credentialNow(): Credential?
 }
 
+/** A reconnecting server-sent-event channel for wiki change signals. */
 class WikiChannel internal constructor(
     private val hosts: WikiHostPool,
     client: OkHttpClient,
@@ -53,6 +55,7 @@ class WikiChannel internal constructor(
             .readTimeout(NO_READ_TIMEOUT, TimeUnit.MILLISECONDS)
             .build()
 
+    /** Returns a flow that emits when the wiki may have new synchronized data. */
     fun changes(inWiki: Long): Flow<Unit> =
         flow {
             var retry = firstRetryMillis

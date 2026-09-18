@@ -6,6 +6,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
 
+/** The host and typed reason recorded for one failed attempt. */
 data class WikiHostFailure(
     val host: String,
     val reason: Reason,
@@ -25,6 +26,7 @@ data class WikiHostFailure(
     }
 }
 
+/** The network condition that prevented a host from answering. */
 enum class NetworkKind {
     TIMEOUT,
     DNS,
@@ -33,6 +35,7 @@ enum class NetworkKind {
     IO,
 }
 
+/** An ordered set of hosts that remembers the last successful selection. */
 class WikiHostPool(
     primary: String,
     mirrors: List<String> = emptyList(),

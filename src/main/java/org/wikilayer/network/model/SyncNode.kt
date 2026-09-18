@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import org.wikilayer.model.NodePath
 import java.time.Instant
 
+/** The structural role of a synchronized node. */
 enum class NodeKind(
     val raw: String,
 ) {
@@ -22,6 +23,7 @@ enum class NodeKind(
     }
 }
 
+/** The complete synchronized representation of one wiki node. */
 data class SyncNode(
     val id: Long,
     val path: String = "",

@@ -7,3 +7,41 @@ live-update APIs. The library owns the server and mirror configuration in
 Safe reads may move to a configured mirror after a network failure or HTTP 451.
 One-use identity tokens, authorization codes, and sign-out requests are never
 retried on a different host.
+
+## Synchronizing wikis
+
+Call `WikiApi.sync` with `null` for the first page. Apply every `SyncNode` in the
+returned order, then persist `SyncBatch.cursor` only after the whole page has
+been stored. While `SyncBatch.hasMore` is true, request the next page immediately
+with that cursor.
+
+A node whose `deleted` value is true removes the local record with the same
+identifier. Other nodes replace the locally stored representation. The overload
+without an explicit limit uses the `syncPageSize` supplied to `WikiApi`.
+
+Cancellation is returned unchanged. Retryable host failures may select a mirror;
+if every candidate fails, the call throws `WikiApiError.Unreachable`.
+
+## Live changes
+
+`WikiChannel.changes` is a signal to synchronize, not a stream of wiki data. Each
+element means the application should run the normal cursor-based synchronization
+pass. Several changes may be represented by one signal, and reconnecting does not
+replay missed signals, so the synchronization cursor remains the source of
+completeness.
+
+The channel reconnects after a failure with exponential backoff between its first
+and longest retry intervals. It calls `onFailure` before waiting. Cancelling
+collection closes the network call without reporting a failure. The `Signing`
+callback is evaluated for every connection attempt, so a renewed or removed
+credential takes effect after reconnecting.
+
+## Authentication
+
+Call `AuthApi.prepareHost` before opening the Apple or Google sign-in interface.
+The preflight selects a reachable host before the provider creates a one-use
+identity token. Send that token once with `AuthApi.signIn`.
+
+For browser OAuth, create a `Pkce` value and one `AuthorizationRequest`. The
+request remembers its issuing host internally, and `AuthApi.exchange` sends the
+code only to that host.

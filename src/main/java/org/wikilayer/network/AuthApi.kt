@@ -11,6 +11,7 @@ import org.wikilayer.network.model.Account
 import org.wikilayer.network.model.Credential
 import org.wikilayer.network.model.TokenGrant
 
+/** Authentication and account operations for a shared host pool. */
 class AuthApi internal constructor(
     private val hosts: WikiHostPool,
     client: OkHttpClient,
@@ -31,6 +32,7 @@ class AuthApi internal constructor(
 
     private val transport = JsonTransport(client, mapper)
 
+    /** Exchanges a native provider token once on the selected host. */
     suspend fun signIn(
         identityToken: String,
         provider: NativeProvider = NativeProvider.GOOGLE,
@@ -51,6 +53,7 @@ class AuthApi internal constructor(
                 ).credential()
         }
 
+    /** Selects a reachable host before the caller obtains a one-use provider token. */
     suspend fun prepareHost() {
         onAvailableHost(hosts) { host ->
             transport.data(
@@ -63,6 +66,7 @@ class AuthApi internal constructor(
         }
     }
 
+    /** Creates a browser authorization request on the selected host. */
     fun authorizationRequest(
         provider: String,
         state: String,
@@ -88,6 +92,7 @@ class AuthApi internal constructor(
             )
         }
 
+    /** Exchanges an OAuth code on the host that issued [authorization]. */
     suspend fun exchange(
         code: String,
         verifier: String,
@@ -125,11 +130,13 @@ class AuthApi internal constructor(
             )
         }
 
+    /** Returns the account represented by [credential]. */
     suspend fun account(credential: Credential): Account =
         onAvailableHost(hosts) { host ->
             transport.value(Account::class.java, signed(host, "api/me", credential).get().build())
         }
 
+    /** Changes the display name and returns the updated account. */
     suspend fun rename(
         to: String,
         credential: Credential,
@@ -143,6 +150,7 @@ class AuthApi internal constructor(
             )
         }
 
+    /** Revokes [credential] on its selected host. */
     suspend fun signOut(credential: Credential) {
         onSelectedHost(hosts) { host ->
             transport.data(
@@ -179,6 +187,7 @@ class AuthApi internal constructor(
     }
 }
 
+/** A provider that issues a native identity token. */
 enum class NativeProvider(
     val wireName: String,
 ) {
@@ -186,11 +195,13 @@ enum class NativeProvider(
     GOOGLE("google"),
 }
 
+/** A browser authorization URL bound to the host that issued it. */
 class AuthorizationRequest internal constructor(
     val url: String,
     internal val host: String,
 )
 
+/** The public parameters that identify an OAuth client. */
 data class OAuthClient(
     val id: String,
     val redirectUri: String,

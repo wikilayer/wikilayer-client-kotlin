@@ -3,6 +3,7 @@ package org.wikilayer.network.model
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.Instant
 
+/** The visibility reported for a wiki owned by the current account. */
 enum class WikiVisibility(
     val raw: String,
 ) {
@@ -18,6 +19,7 @@ enum class WikiVisibility(
     }
 }
 
+/** One wiki in the authenticated account's cursor-based listing. */
 data class MyWiki(
     val id: Long,
     val title: String = "",
@@ -28,6 +30,7 @@ data class MyWiki(
     val removed: Boolean = false,
 )
 
+/** A page of wikis belonging to the authenticated account. */
 data class MyWikiPage(
     val wikis: List<MyWiki>,
     @field:JsonProperty("has_more") val hasMore: Boolean = false,

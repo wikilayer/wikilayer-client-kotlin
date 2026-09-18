@@ -1,0 +1,4 @@
+documentation: https://wikilayer.github.io/wikilayer-client-kotlin/scripts/pages.json
+
+skip:
+  - build/

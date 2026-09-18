@@ -3,6 +3,7 @@ package org.wikilayer.network.model
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.Instant
 
+/** One entry in the public wiki directory. */
 data class WikiSummary(
     val id: Long,
     val title: String,
@@ -10,11 +11,13 @@ data class WikiSummary(
     @field:JsonProperty("updated_at") val updatedAt: Instant,
 )
 
+/** An offset-based page of public directory entries. */
 data class WikiPage(
     val wikis: List<WikiSummary>,
     @field:JsonProperty("has_more") val hasMore: Boolean,
 )
 
+/** The wiki and node identified by a Wikilayer URL. */
 data class ResolvedAddress(
     @field:JsonProperty("wiki_id") val wikiId: Long,
     @field:JsonProperty("node_id") val nodeId: Long,

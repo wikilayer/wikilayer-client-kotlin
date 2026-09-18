@@ -7,36 +7,36 @@ The Kotlin/Android client for Wikilayer's API. It is a port of
 [wikilayer-client-swift](https://github.com/wikilayer/wikilayer-client-swift),
 which leads the shared behavior.
 
-The library owns its primary server and ordered mirrors in `hosts.yaml`. An app
-uses the bundled configuration instead of copying host addresses into its own
-configuration:
+The library owns the requests and responses that cross the network. It does not
+own a local database, screen state, or background scheduling.
 
-```kotlin
-val hosts = WikiHostConfiguration.bundled.pool()
-val api = WikiApi(hosts)
-```
-
-Safe reads fail over after network errors or configured HTTP statuses (451 by
-default). A safe preflight chooses a reachable host before the app obtains a
-one-use provider token. Identity tokens, OAuth authorization codes, and sign-out
-requests are never replayed against another host.
-
-## Taking it
-
-The library is published from GitHub releases through JitPack:
+Add JitPack and the library dependency:
 
 ```kotlin
 repositories { maven("https://jitpack.io") }
 
 dependencies {
-    implementation("com.github.wikilayer:wikilayer-client-kotlin:0.1.0")
+    implementation("com.github.wikilayer:wikilayer-client-kotlin:0.1.3")
 }
 ```
 
-## Documentation
+Create the APIs from the bundled host configuration:
 
-The [Dokka API reference](https://wikilayer.github.io/wikilayer-client-kotlin/)
-is generated from the public Kotlin API and deployed by GitHub Actions.
+```kotlin
+val hosts = WikiHostConfiguration.bundled.pool()
+val api = WikiApi(hosts)
+val directory = api.wikis(matching = "markdown")
+val batch = api.sync(wikiId = 2982, after = null)
+```
+
+## Host configuration
+
+The library ships the primary server and any mirrors in `hosts.yaml`; applications
+use `WikiHostConfiguration.bundled` instead of copying those addresses. Safe reads
+can move to another host after a retryable failure, while one-use authentication
+credentials remain bound to one selected host. The
+[Dokka API reference](https://wikilayer.github.io/wikilayer-client-kotlin/)
+describes host selection, authentication, synchronization, and live changes.
 
 ## Development
 

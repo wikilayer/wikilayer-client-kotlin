@@ -4,6 +4,7 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 import android.util.Base64 as SystemBase64
 
+/** A verifier, challenge, and state for one OAuth authorization flow. */
 class Pkce {
     val verifier: String = randomText()
     val state: String = randomText()

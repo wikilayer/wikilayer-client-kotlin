@@ -1,5 +1,6 @@
 package org.wikilayer.model
 
+/** A dot-separated ancestry path returned with a synchronized node. */
 @JvmInline
 value class NodePath(
     val text: String,
@@ -14,8 +15,10 @@ value class NodePath(
 
     val depth: Int get() = maxOf(labels.size - 1, 0)
 
+    /** Returns whether the path has [from] among its ancestors. */
     fun descends(from: Long): Boolean = labels.dropLast(1).contains(from.toString())
 
+    /** Returns whether this path is [other] or one of its descendants. */
     fun sitsInside(other: NodePath): Boolean = text == other.text || text.startsWith("${other.text}.")
 
     private fun idAt(position: Int): Long {

@@ -11,6 +11,7 @@ import org.wikilayer.network.model.SyncBatch
 import org.wikilayer.network.model.WikiPage
 import java.io.IOException
 
+/** A server refusal, unreadable response, or exhaustion of the configured hosts. */
 sealed class WikiApiError(
     message: String,
     cause: Throwable? = null,
@@ -29,6 +30,7 @@ sealed class WikiApiError(
     ) : WikiApiError("none of the configured wiki hosts could be reached", cause)
 }
 
+/** Reads directory entries, resolves addresses, and synchronizes wiki nodes. */
 class WikiApi internal constructor(
     private val hosts: WikiHostPool,
     client: OkHttpClient,
@@ -55,6 +57,7 @@ class WikiApi internal constructor(
 
     private val transport = JsonTransport(client, mapper)
 
+    /** Fetches one page of changes after a cursor with an explicit page size. */
     override suspend fun sync(
         wikiId: Long,
         after: String?,
@@ -71,12 +74,14 @@ class WikiApi internal constructor(
             )
         }
 
+    /** Fetches one page of changes using the configured synchronization page size. */
     suspend fun sync(
         wikiId: Long,
         after: String?,
         credential: Credential? = null,
     ): SyncBatch = sync(wikiId, after, syncPageSize, credential)
 
+    /** Searches the public directory. */
     suspend fun wikis(
         matching: String = "",
         limit: Int = directoryPageSize,
@@ -92,6 +97,7 @@ class WikiApi internal constructor(
             )
         }
 
+    /** Resolves a public or accessible Wikilayer URL to wiki and node identifiers. */
     suspend fun resolve(
         link: String,
         credential: Credential? = null,
@@ -103,6 +109,7 @@ class WikiApi internal constructor(
             )
         }
 
+    /** Fetches one cursor-based page of the authenticated account's wikis. */
     override suspend fun myWikis(
         after: String?,
         credential: Credential,
@@ -118,6 +125,7 @@ class WikiApi internal constructor(
             )
         }
 
+    /** Fetches account wikis using the configured synchronization page size. */
     suspend fun myWikis(
         after: String?,
         credential: Credential,
