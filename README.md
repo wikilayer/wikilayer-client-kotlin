@@ -48,10 +48,6 @@ make docs
 make build
 ```
 
-## License
-
-MIT.
-
 ## Lines of Code
 
 <picture>
