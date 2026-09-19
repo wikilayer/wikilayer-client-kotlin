@@ -155,12 +155,17 @@ class AuthApi internal constructor(
         reason: String,
         credential: Credential,
     ) {
-        onSelectedHost(hosts) { host ->
-            transport.data(
-                signed(host, "api/me", credential)
-                    .delete(mapper.writeValueAsBytes(mapOf("reason" to reason)).toRequestBody(JSON))
-                    .build(),
-            )
+        try {
+            onSelectedHost(hosts) { host ->
+                transport.data(
+                    signed(host, "api/me", credential)
+                        .delete(mapper.writeValueAsBytes(mapOf("reason" to reason)).toRequestBody(JSON))
+                        .build(),
+                )
+            }
+        } catch (refused: WikiApiError.Status) {
+            if (refused.code == CONFLICT) throw AccountDeletionError.LiveWikis(refused)
+            throw refused
         }
     }
 
@@ -198,7 +203,16 @@ class AuthApi internal constructor(
 
     companion object {
         private val JSON = "application/json".toMediaType()
+        private const val CONFLICT = 409
     }
+}
+
+sealed class AccountDeletionError(
+    cause: Throwable,
+) : Exception(cause) {
+    class LiveWikis(
+        cause: Throwable,
+    ) : AccountDeletionError(cause)
 }
 
 /** A provider that issues a native identity token. */

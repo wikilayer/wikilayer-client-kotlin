@@ -173,6 +173,15 @@ class AuthApiTest {
         }
 
     @Test
+    fun `a live wiki is an account deletion refusal, not a status for the app to interpret`() {
+        answer("""{"error":"live_wikis"}""", code = 409)
+
+        assertThrows(AccountDeletionError.LiveWikis::class.java) {
+            runTest { auth.deleteAccount(reason = "", credential = Credential("tok-8")) }
+        }
+    }
+
+    @Test
     fun `signing out revokes the token rather than only forgetting it`() =
         runTest {
             answer("", code = 204)

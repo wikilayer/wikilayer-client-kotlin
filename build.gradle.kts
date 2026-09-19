@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.wikilayer"
-version = "0.1.4"
+version = "0.1.5"
 
 android {
     namespace = "org.wikilayer.client"
