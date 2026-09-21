@@ -124,13 +124,41 @@ class WikiApiTest {
         }
 
     @Test
-    fun `a wiki in the directory carries its icon and whether it keeps pages under pages`() =
+    fun `a wiki says what it looks like on its own node, which is how every reader gets it`() =
+        runTest {
+            answer(
+                """
+                {"nodes":[
+                  {"id":2982,"path":"2982","kind":"wiki","title":"Guide","pages_tree":true,
+                   "icon_url":"https://wikilayer.org/s/icons/2982/abcdefgh.png",
+                   "changed_at":"2026-08-25T10:00:00Z"},
+                  {"id":4401,"path":"2982.4401","kind":"page","title":"Agent rules","page_id":4401,
+                   "changed_at":"2026-08-25T10:00:01Z"}
+                ],"has_more":false}
+                """.trimIndent(),
+            )
+
+            val nodes = api.sync(2982, after = null, limit = 500).nodes
+
+            assertEquals(
+                "a reader who only follows a wiki is never listed it, " +
+                    "so this is the one answer that reaches them",
+                "https://wikilayer.org/s/icons/2982/abcdefgh.png",
+                nodes[0].iconUrl,
+            )
+            assertTrue(nodes[0].pagesTree)
+            assertNull("a page is not a wiki and carries none of this", nodes[1].iconUrl)
+            assertFalse(nodes[1].pagesTree)
+        }
+
+    @Test
+    fun `a wiki the reader does not hold yet is offered with its icon`() =
         runTest {
             answer(
                 """
                 {"wikis":[
                   {"id":2982,"title":"Guide","url_path":"/smee-again/guide",
-                   "icon_url":"https://wikilayer.org/s/icons/2982/abcdefgh.png","pages_tree":true,
+                   "icon_url":"https://wikilayer.org/s/icons/2982/abcdefgh.png",
                    "updated_at":"2026-08-25T10:00:00Z"},
                   {"id":1025,"title":"Flat","url_path":"/smee-again/flat",
                    "updated_at":"2026-08-25T10:00:00Z"}
@@ -141,9 +169,7 @@ class WikiApiTest {
             val wikis = api.wikis(matching = "guide").wikis
 
             assertEquals("https://wikilayer.org/s/icons/2982/abcdefgh.png", wikis[0].iconUrl)
-            assertTrue(wikis[0].pagesTree)
             assertNull("a wiki with no icon says nothing about one", wikis[1].iconUrl)
-            assertFalse(wikis[1].pagesTree)
         }
 
     @Test
@@ -153,8 +179,7 @@ class WikiApiTest {
                 """
                 {"wiki_id":2982,"node_id":4401,"language":"en","wiki_title":"Guide",
                  "wiki_url_path":"/smee-again/guide",
-                 "wiki_icon_url":"https://wikilayer.org/s/icons/2982/abcdefgh.png",
-                 "wiki_pages_tree":true}
+                 "wiki_icon_url":"https://wikilayer.org/s/icons/2982/abcdefgh.png"}
                 """.trimIndent(),
             )
 
@@ -166,7 +191,6 @@ class WikiApiTest {
                 "https://wikilayer.org/s/icons/2982/abcdefgh.png",
                 found.wikiIconUrl,
             )
-            assertTrue(found.wikiPagesTree)
         }
 
     @Test
@@ -319,24 +343,6 @@ class WikiApiTest {
             assertEquals("/api/me/wikis", Uri.parse(asked.url.toString()).path)
             assertEquals("c-1", Uri.parse(asked.url.toString()).getQueryParameter("cursor"))
             assertEquals("Bearer tok", asked.headers["Authorization"])
-        }
-
-    @Test
-    fun `a reader's own wiki carries its icon and whether it keeps pages under pages`() =
-        runTest {
-            answer(
-                """
-                {"wikis":[
-                  {"id":7,"title":"Ferries","url_path":"/a-reader/ferries","visibility":"private","mine":true,
-                   "icon_url":"https://wikilayer.org/s/icons/7/abcdefgh.png","pages_tree":true}
-                ],"has_more":false}
-                """.trimIndent(),
-            )
-
-            val row = api.myWikis(after = null, credential = Credential("tok"), limit = PAGE_SIZE).wikis[0]
-
-            assertEquals("https://wikilayer.org/s/icons/7/abcdefgh.png", row.iconUrl)
-            assertTrue(row.pagesTree)
         }
 
     @Test

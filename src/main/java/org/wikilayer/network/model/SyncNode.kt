@@ -34,6 +34,8 @@ data class SyncNode(
     val language: String = "",
     @field:JsonProperty("sort_key") val sortKey: String = "",
     @field:JsonProperty("page_id") val pageId: Long = 0,
+    @field:JsonProperty("icon_url") val iconUrl: String? = null,
+    @field:JsonProperty("pages_tree") val pagesTree: Boolean = false,
     @field:JsonProperty("translation_group") val translationGroup: Long = 0,
     @field:JsonProperty("changed_at") val changedAt: Instant,
     val deleted: Boolean = false,

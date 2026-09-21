@@ -19,6 +19,10 @@ A node whose `deleted` value is true removes the local record with the same
 identifier. Other nodes replace the locally stored representation. The overload
 without an explicit limit uses the `syncPageSize` supplied to `WikiApi`.
 
+The wiki's own node carries what the wiki looks like: `SyncNode.iconUrl` and
+`SyncNode.pagesTree`. A reader who follows a wiki rather than owning it is listed
+it nowhere, so this is the answer that reaches every wiki held.
+
 `SyncNode.pageId` names the page a node belongs to: a page answers with itself,
 and a block with its nearest page ancestor. A page's document is the nodes
 carrying its identifier, which is what stops that document at a page nested

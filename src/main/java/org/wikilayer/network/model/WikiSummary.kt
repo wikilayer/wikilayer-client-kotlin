@@ -9,7 +9,6 @@ data class WikiSummary(
     val title: String,
     @field:JsonProperty("url_path") val urlPath: String,
     @field:JsonProperty("icon_url") val iconUrl: String? = null,
-    @field:JsonProperty("pages_tree") val pagesTree: Boolean = false,
     @field:JsonProperty("updated_at") val updatedAt: Instant,
 )
 
@@ -27,5 +26,4 @@ data class ResolvedAddress(
     @field:JsonProperty("wiki_title") val wikiTitle: String = "",
     @field:JsonProperty("wiki_url_path") val wikiUrlPath: String = "",
     @field:JsonProperty("wiki_icon_url") val wikiIconUrl: String? = null,
-    @field:JsonProperty("wiki_pages_tree") val wikiPagesTree: Boolean = false,
 )

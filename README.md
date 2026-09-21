@@ -16,7 +16,7 @@ Add JitPack and the library dependency:
 repositories { maven("https://jitpack.io") }
 
 dependencies {
-    implementation("com.github.wikilayer:wikilayer-client-kotlin:0.2.0")
+    implementation("com.github.wikilayer:wikilayer-client-kotlin:0.3.0")
 }
 ```
 
