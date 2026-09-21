@@ -93,6 +93,83 @@ class WikiApiTest {
         }
 
     @Test
+    fun `every node says which page it belongs to, and the server is the one that knows`() =
+        runTest {
+            answer(
+                """
+                {"nodes":[
+                  {"id":2982,"path":"2982","kind":"wiki","title":"Guide",
+                   "changed_at":"2026-08-25T10:00:00Z"},
+                  {"id":4401,"path":"2982.4401","kind":"page","title":"Agent rules","page_id":4401,
+                   "changed_at":"2026-08-25T10:00:01Z"},
+                  {"id":4402,"path":"2982.4401.4402","kind":"page","title":"Nested","page_id":4402,
+                   "changed_at":"2026-08-25T10:00:02Z"},
+                  {"id":4403,"path":"2982.4401.4402.4403","kind":"block","title":"Under the nested page",
+                   "page_id":4402,"changed_at":"2026-08-25T10:00:03Z"}
+                ],"has_more":false}
+                """.trimIndent(),
+            )
+
+            val pages = api.sync(2982, after = null, limit = 500).nodes.associate { it.id to it.pageId }
+
+            assertEquals(
+                "a path carries ids and no kinds, so a reader that worked this out itself " +
+                    "would stitch the block into the page above",
+                4402L,
+                pages[4403],
+            )
+            assertEquals("a page belongs to its own document", 4402L, pages[4402])
+            assertEquals(4401L, pages[4401])
+            assertEquals("the wiki belongs to no page", 0L, pages[2982])
+        }
+
+    @Test
+    fun `a wiki in the directory carries its icon and whether it keeps pages under pages`() =
+        runTest {
+            answer(
+                """
+                {"wikis":[
+                  {"id":2982,"title":"Guide","url_path":"/smee-again/guide",
+                   "icon_url":"https://wikilayer.org/s/icons/2982/abcdefgh.png","pages_tree":true,
+                   "updated_at":"2026-08-25T10:00:00Z"},
+                  {"id":1025,"title":"Flat","url_path":"/smee-again/flat",
+                   "updated_at":"2026-08-25T10:00:00Z"}
+                ],"has_more":false}
+                """.trimIndent(),
+            )
+
+            val wikis = api.wikis(matching = "guide").wikis
+
+            assertEquals("https://wikilayer.org/s/icons/2982/abcdefgh.png", wikis[0].iconUrl)
+            assertTrue(wikis[0].pagesTree)
+            assertNull("a wiki with no icon says nothing about one", wikis[1].iconUrl)
+            assertFalse(wikis[1].pagesTree)
+        }
+
+    @Test
+    fun `resolving a link describes the wiki behind it the way the directory does`() =
+        runTest {
+            answer(
+                """
+                {"wiki_id":2982,"node_id":4401,"language":"en","wiki_title":"Guide",
+                 "wiki_url_path":"/smee-again/guide",
+                 "wiki_icon_url":"https://wikilayer.org/s/icons/2982/abcdefgh.png",
+                 "wiki_pages_tree":true}
+                """.trimIndent(),
+            )
+
+            val found = api.resolve("https://wikilayer.org/smee-again/guide/4401")
+
+            assertEquals(
+                "a wiki followed from a link is stored from this answer alone, " +
+                    "so what it leaves out the reader never gets",
+                "https://wikilayer.org/s/icons/2982/abcdefgh.png",
+                found.wikiIconUrl,
+            )
+            assertTrue(found.wikiPagesTree)
+        }
+
+    @Test
     fun `the directory answers with wikis to follow, and says whether there are more`() =
         runTest {
             answer(
@@ -242,6 +319,24 @@ class WikiApiTest {
             assertEquals("/api/me/wikis", Uri.parse(asked.url.toString()).path)
             assertEquals("c-1", Uri.parse(asked.url.toString()).getQueryParameter("cursor"))
             assertEquals("Bearer tok", asked.headers["Authorization"])
+        }
+
+    @Test
+    fun `a reader's own wiki carries its icon and whether it keeps pages under pages`() =
+        runTest {
+            answer(
+                """
+                {"wikis":[
+                  {"id":7,"title":"Ferries","url_path":"/a-reader/ferries","visibility":"private","mine":true,
+                   "icon_url":"https://wikilayer.org/s/icons/7/abcdefgh.png","pages_tree":true}
+                ],"has_more":false}
+                """.trimIndent(),
+            )
+
+            val row = api.myWikis(after = null, credential = Credential("tok"), limit = PAGE_SIZE).wikis[0]
+
+            assertEquals("https://wikilayer.org/s/icons/7/abcdefgh.png", row.iconUrl)
+            assertTrue(row.pagesTree)
         }
 
     @Test

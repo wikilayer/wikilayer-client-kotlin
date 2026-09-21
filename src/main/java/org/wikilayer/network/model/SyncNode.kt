@@ -33,6 +33,7 @@ data class SyncNode(
     val markdown: String = "",
     val language: String = "",
     @field:JsonProperty("sort_key") val sortKey: String = "",
+    @field:JsonProperty("page_id") val pageId: Long = 0,
     @field:JsonProperty("translation_group") val translationGroup: Long = 0,
     @field:JsonProperty("changed_at") val changedAt: Instant,
     val deleted: Boolean = false,
@@ -40,8 +41,6 @@ data class SyncNode(
     val nodePath: NodePath get() = NodePath(path)
 
     val parentId: Long get() = nodePath.parent
-
-    val pageId: Long get() = nodePath.page
 
     val depth: Int get() = nodePath.depth
 }

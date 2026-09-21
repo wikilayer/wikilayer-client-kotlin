@@ -9,8 +9,6 @@ value class NodePath(
 
     val wiki: Long get() = idAt(0)
 
-    val page: Long get() = idAt(1)
-
     val parent: Long get() = idAt(labels.size - 2)
 
     val depth: Int get() = maxOf(labels.size - 1, 0)

@@ -11,28 +11,28 @@ class NodePathTest {
         val block = NodePath("2982.4401.3903")
 
         assertEquals(2982L, block.wiki)
-        assertEquals(4401L, block.page)
         assertEquals(4401L, block.parent)
         assertEquals(2, block.depth)
     }
 
     @Test
-    fun `a wiki answers with itself and sits on no page`() {
+    fun `a wiki answers with itself and hangs from nothing`() {
         val root = NodePath("2982")
 
         assertEquals(2982L, root.wiki)
-        assertEquals(NodePath.NONE, root.page)
         assertEquals(NodePath.NONE, root.parent)
         assertEquals(0, root.depth)
     }
 
     @Test
-    fun `a page is its own page and hangs from its wiki`() {
-        val page = NodePath("2982.4401")
-
-        assertEquals(4401L, page.page)
-        assertEquals(2982L, page.parent)
-        assertEquals(1, page.depth)
+    fun `a page hangs from what is above it, which need not be the wiki`() {
+        assertEquals(2982L, NodePath("2982.4401").parent)
+        assertEquals(1, NodePath("2982.4401").depth)
+        assertEquals(
+            "with pages under pages the node above is a page as often as it is the wiki",
+            4401L,
+            NodePath("2982.4401.4402").parent,
+        )
     }
 
     @Test

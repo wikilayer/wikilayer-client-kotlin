@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.2.0
+
+### Added
+
+- `SyncNode.pageId` names the page a node belongs to, as the server works it
+  out: a page answers with itself, a block with its nearest page ancestor. A
+  page's document is the nodes carrying its identifier, so it stops at a page
+  nested inside it.
+- `WikiSummary`, `MyWiki` and `ResolvedAddress` carry the wiki's icon and
+  whether it keeps pages under pages: `iconUrl` / `wikiIconUrl` and
+  `pagesTree` / `wikiPagesTree`.
+
+### Removed
+
+- `NodePath.page`. A path carries identifiers and no kinds, so it could only
+  ever answer with the first node below the wiki, which is the wrong page for
+  anything inside a nested one. Read `SyncNode.pageId` instead:
+
+  ```kotlin
+  // was
+  val page = node.nodePath.page
+  // now
+  val page = node.pageId
+  ```
+
+  A store that derived its own page column from the path holds the same
+  mistake and has to be rebuilt from the synchronized values.
+
+### Requires
+
+- A server from 21 September 2026 or later. Against an older one every
+  `pageId` reads 0.
+
+## 0.1.5
+
+### Added
+
+- The account API reports the server's refusal to close an account that still
+  owns a live wiki, so the app can say which wikis are in the way.
+
+## 0.1.4
+
+### Added
+
+- `closeAccount` for deleting an account from the app.
+
 ## 0.1.3
 
 ### Changed

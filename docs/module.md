@@ -19,6 +19,12 @@ A node whose `deleted` value is true removes the local record with the same
 identifier. Other nodes replace the locally stored representation. The overload
 without an explicit limit uses the `syncPageSize` supplied to `WikiApi`.
 
+`SyncNode.pageId` names the page a node belongs to: a page answers with itself,
+and a block with its nearest page ancestor. A page's document is the nodes
+carrying its identifier, which is what stops that document at a page nested
+inside it. `SyncNode.path` cannot answer this, because it carries identifiers
+and no kinds, so the server is the side that works it out.
+
 Cancellation is returned unchanged. Retryable host failures may select a mirror;
 if every candidate fails, the call throws `WikiApiError.Unreachable`.
 
