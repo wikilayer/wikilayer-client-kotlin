@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.wikilayer"
-version = "0.1.5"
+version = "0.4.0"
 
 android {
     namespace = "org.wikilayer.client"
@@ -64,6 +64,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-annotations:2.22")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:5.5.0")
     testImplementation("org.robolectric:robolectric:4.16.1")

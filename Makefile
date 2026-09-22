@@ -2,9 +2,12 @@ COMMENTCENSOR_VERSION ?= v0.3.2
 COMMENTCENSOR_ENV = build/commentcensor
 COMMENTCENSOR = $(COMMENTCENSOR_ENV)/bin/commentcensor
 
+SWIFT_DIR = ../wikilayer-client-swift
+TEST_RESOURCES = src/test/resources
+
 .DEFAULT_GOAL := build
 
-.PHONY: install format comments lint test-build test docs build
+.PHONY: install format comments lint test-build test docs build sync-yaml
 
 install:
 	python3 -m venv $(COMMENTCENSOR_ENV)
@@ -30,3 +33,7 @@ docs:
 
 build: lint test-build test docs
 	./gradlew assembleRelease
+
+sync-yaml:
+	mkdir -p $(TEST_RESOURCES)
+	cp $(SWIFT_DIR)/Tests/WikilayerClientTests/Resources/*.yaml $(TEST_RESOURCES)/
