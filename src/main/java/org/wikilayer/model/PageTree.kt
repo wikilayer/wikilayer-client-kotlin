@@ -43,6 +43,21 @@ data class PageOutlineRow(
     val hasChildren: Boolean,
 )
 
+private val byCodePoint =
+    Comparator<String> { left, right ->
+        var here = 0
+        var there = 0
+        var verdict = 0
+        while (verdict == 0 && here < left.length && there < right.length) {
+            val one = left.codePointAt(here)
+            val other = right.codePointAt(there)
+            verdict = one.compareTo(other)
+            here += Character.charCount(one)
+            there += Character.charCount(other)
+        }
+        if (verdict != 0) verdict else (left.length - here).compareTo(right.length - there)
+    }
+
 /**
  * Nests the pages of one wiki, in one language, into the tree their author made.
  *
@@ -59,7 +74,11 @@ data class PageOutlineRow(
 fun List<PageInTree>.pageTree(): List<PageBranch> {
     val pages =
         distinctBy { it.id }
-            .sortedWith(compareByDescending<PageInTree> { it.isHome }.thenBy { it.sortKey }.thenBy { it.id })
+            .sortedWith(
+                compareByDescending<PageInTree> { it.isHome }
+                    .thenBy(byCodePoint) { it.sortKey }
+                    .thenBy { it.id },
+            )
 
     val childrenOf = pages.filter { it.parentId != it.id }.groupBy { it.parentId }
     val placed = mutableSetOf<Long>()

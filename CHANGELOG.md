@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0
+
+Ported from wikilayer-client-swift 0.5.0.
+
+### Fixed
+
+- Siblings whose sort keys reach past the basic plane came back in a different
+  order here than in the other ports: strings compared as this platform stores
+  them, by unit, and a character above that plane sorts below one written in a
+  single unit. Sort keys are read by their code points now, and the shared corpus
+  holds the case.
+
 ## 0.4.0
 
 Ported from wikilayer-client-swift 0.4.0.
