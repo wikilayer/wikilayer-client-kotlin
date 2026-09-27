@@ -10,13 +10,13 @@ which leads the shared behavior.
 The library owns the requests and responses that cross the network. It does not
 own a local database, screen state, or background scheduling.
 
-Add JitPack and the library dependency:
+The library is published to Maven Central:
 
 ```kotlin
-repositories { maven("https://jitpack.io") }
+repositories { mavenCentral() }
 
 dependencies {
-    implementation("com.github.wikilayer:wikilayer-client-kotlin:0.3.0")
+    implementation("org.wikilayer:wikilayer-client-kotlin:0.5.1")
 }
 ```
 

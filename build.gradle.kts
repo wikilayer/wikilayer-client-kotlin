@@ -1,13 +1,22 @@
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.DeploymentValidation
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
+
 plugins {
     id("com.android.library") version "9.4.1"
-    `maven-publish`
+    id("com.vanniktech.maven.publish") version "0.37.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
     id("org.jetbrains.dokka") version "2.2.0"
 }
 
-group = "com.github.wikilayer"
-version = "0.5.0"
+group = "org.wikilayer"
+version =
+    requireNotNull(
+        Regex("""^## (\d+\.\d+\.\d+)$""", RegexOption.MULTILINE)
+            .find(file("CHANGELOG.md").readText()),
+    ) { "CHANGELOG.md has no released version heading" }.groupValues[1]
 
 android {
     namespace = "org.wikilayer.client"
@@ -25,16 +34,42 @@ android {
             allWarningsAsErrors.set(true)
         }
     }
-    publishing { singleVariant("release") { withSourcesJar() } }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
-                artifactId = "wikilayer-client-kotlin"
+mavenPublishing {
+    configure(
+        AndroidSingleVariantLibrary(
+            javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml"),
+            sourcesJar = SourcesJar.Sources(),
+            variant = "release",
+        ),
+    )
+    publishToMavenCentral(automaticRelease = true, validateDeployment = DeploymentValidation.PUBLISHED)
+    if (!providers.gradleProperty("unsignedLocalPublish").isPresent) {
+        signAllPublications()
+    }
+    coordinates("org.wikilayer", "wikilayer-client-kotlin", version.toString())
+    pom {
+        name.set("Wikilayer Client for Kotlin")
+        description.set("The Kotlin/Android client for Wikilayer's API.")
+        url.set("https://github.com/wikilayer/wikilayer-client-kotlin")
+        licenses {
+            license {
+                name.set("MIT License")
+                url.set("https://opensource.org/licenses/MIT")
             }
+        }
+        developers {
+            developer {
+                id.set("wikilayer")
+                name.set("Wikilayer")
+                url.set("https://github.com/wikilayer")
+            }
+        }
+        scm {
+            url.set("https://github.com/wikilayer/wikilayer-client-kotlin")
+            connection.set("scm:git:https://github.com/wikilayer/wikilayer-client-kotlin.git")
+            developerConnection.set("scm:git:ssh://git@github.com/wikilayer/wikilayer-client-kotlin.git")
         }
     }
 }

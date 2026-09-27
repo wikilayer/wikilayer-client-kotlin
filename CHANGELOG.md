@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.1
+
+### Changed
+
+- Published to Maven Central as `org.wikilayer:wikilayer-client-kotlin`, signed,
+  instead of JitPack. The code is the same as 0.5.0.
+
+  Before:
+
+  ```kotlin
+  repositories { maven("https://jitpack.io") }
+  dependencies { implementation("com.github.wikilayer:wikilayer-client-kotlin:0.5.0") }
+  ```
+
+  After:
+
+  ```kotlin
+  repositories { mavenCentral() }
+  dependencies { implementation("org.wikilayer:wikilayer-client-kotlin:0.5.1") }
+  ```
+
+  Drop the JitPack repository if nothing else comes from it.
+
 ## 0.5.0
 
 Ported from wikilayer-client-swift 0.5.0.
