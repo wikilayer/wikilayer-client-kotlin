@@ -1,23 +1,18 @@
-COMMENTCENSOR_REF ?= 48d702a6ba4ace9af0bf996fad2fff9a012f25f9
-COMMENTCENSOR_ENV = build/commentcensor
-COMMENTCENSOR = $(COMMENTCENSOR_ENV)/bin/commentcensor
-
 SWIFT_DIR = ../wikilayer-client-swift
 TEST_RESOURCES = src/test/resources
 
 .DEFAULT_GOAL := build
 
-.PHONY: install format comments lint test-build test docs build sync-yaml publish publish-local publish-check
+.PHONY: install-tools format comments lint test-build test docs build sync-yaml publish publish-local publish-check
 
-install:
-	python3 -m venv $(COMMENTCENSOR_ENV)
-	$(COMMENTCENSOR_ENV)/bin/pip install --quiet --upgrade git+https://github.com/botforge-pro/commentcensor.git@$(COMMENTCENSOR_REF)
+install-tools:
+	python3 -m pip install --quiet --upgrade git+https://github.com/botforge-pro/commentcensor.git
 
 format:
 	./gradlew ktlintFormat
 
 comments:
-	$(COMMENTCENSOR) .
+	commentcensor .
 
 lint: comments
 	./gradlew ktlintCheck detekt
