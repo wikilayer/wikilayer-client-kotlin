@@ -23,7 +23,7 @@ class CorpusCopyTest {
     fun `the cases match the leading port`() {
         for ((there, here) in SHARED) {
             assertEquals(
-                "$here differs from the leading port: run `make sync-yaml`",
+                "$here differs from the leading port: run `make sync-yaml` in wikilayer-client-swift",
                 fetch(there),
                 copy(here),
             )
@@ -44,7 +44,7 @@ class CorpusCopyTest {
 
     private fun copy(path: String): String =
         requireNotNull(CorpusCopyTest::class.java.getResourceAsStream(path)) {
-            "$path is missing: run `make sync-yaml`"
+            "$path is missing: run `make sync-yaml` in wikilayer-client-swift"
         }.use { it.readBytes().decodeToString() }
 
     private companion object {

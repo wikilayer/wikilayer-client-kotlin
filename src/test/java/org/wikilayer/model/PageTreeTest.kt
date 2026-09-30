@@ -171,7 +171,7 @@ class PageTreeTest {
                 .registerKotlinModule()
                 .readValue(
                     requireNotNull(PageTreeTest::class.java.getResourceAsStream("/page_tree_tests.yaml")) {
-                        "page_tree_tests.yaml is missing: run `make sync-yaml`"
+                        "page_tree_tests.yaml is missing: run `make sync-yaml` in wikilayer-client-swift"
                     },
                 )
     }
