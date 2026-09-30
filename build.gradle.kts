@@ -94,7 +94,7 @@ dokka {
 dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.21.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.3")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1")
     api("com.fasterxml.jackson.core:jackson-annotations:2.22")
 
