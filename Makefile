@@ -1,9 +1,6 @@
-SWIFT_DIR = ../wikilayer-client-swift
-TEST_RESOURCES = src/test/resources
-
 .DEFAULT_GOAL := build
 
-.PHONY: install-tools format comments lint test-build test docs build sync-yaml publish publish-local publish-check
+.PHONY: install-tools format comments lint test-build test docs build publish publish-local publish-check
 
 install-tools:
 	python3 -m pip install --quiet --upgrade git+https://github.com/botforge-pro/commentcensor.git
@@ -38,7 +35,3 @@ publish-local:
 
 publish-check:
 	./gradlew publishToMavenLocal
-
-sync-yaml:
-	mkdir -p $(TEST_RESOURCES)
-	cp $(SWIFT_DIR)/Tests/WikilayerClientTests/Resources/*.yaml $(TEST_RESOURCES)/
