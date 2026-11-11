@@ -96,7 +96,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.4")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.4")
-    api("com.fasterxml.jackson.core:jackson-annotations:2.22")
+    api("com.fasterxml.jackson.core:jackson-annotations:2.23")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.22.4")
